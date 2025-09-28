@@ -6,6 +6,47 @@ import dynamic from 'next/dynamic';
 // Dynamically import Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
+interface ClusterItem {
+  identifier: string;
+  label: string | null;
+}
+
+interface Cluster {
+  id: number;
+  items: ClusterItem[];
+  size: number;
+}
+
+interface VisualizationPoint {
+  x: number;
+  y: number;
+  identifier: string;
+  cluster: number;
+  label: string | null;
+}
+
+interface DimensionStat {
+  dimension: number;
+  pValue: number;
+  significance: string;
+}
+
+interface Statistics {
+  selectedDimensions: number[];
+  dimensionStats: DimensionStat[];
+  numClusters: number;
+  numDimensions: number;
+  totalSamples: number;
+  labeledSamples: number;
+}
+
+interface Visualization {
+  points: VisualizationPoint[];
+  explainedVariance: number[];
+  totalVarianceExplained: number;
+}
+
+
 interface ResultsProps {
   results: any;
   onReset: () => void;
@@ -29,16 +70,16 @@ export default function Results({ results, onReset }: ResultsProps) {
     '#8B5CF6', '#F97316', '#06B6D4', '#84CC16'
   ];
 
-  const plotData = results.clusters.map((cluster: any, index: number) => ({
+  const plotData = results.clusters.map((cluster: Cluster) => ({
     x: results.visualization.points
-      .filter((p: any) => p.cluster === cluster.id)
-      .map((p: any) => p.x),
+      .filter((p: VisualizationPoint) => p.cluster === cluster.id)
+      .map((p: VisualizationPoint) => p.x),
     y: results.visualization.points
-      .filter((p: any) => p.cluster === cluster.id)
-      .map((p: any) => p.y),
+      .filter((p: VisualizationPoint) => p.cluster === cluster.id)
+      .map((p: VisualizationPoint) => p.y),
     text: results.visualization.points
-      .filter((p: any) => p.cluster === cluster.id)
-      .map((p: any) => `${p.identifier}${p.label ? ` (${p.label})` : ''}`),
+      .filter((p: VisualizationPoint) => p.cluster === cluster.id)
+      .map((p: VisualizationPoint) => `${p.identifier}${p.label ? ` (${p.label})` : ''}`),
     mode: 'markers',
     type: 'scatter',
     name: `Cluster ${cluster.id + 1}`,
@@ -56,19 +97,23 @@ export default function Results({ results, onReset }: ResultsProps) {
       font: { size: 16 }
     },
     xaxis: {
-      title: `PC1 (${(results.visualization.explainedVariance[0] / results.visualization.explainedVariance.reduce((a: number, b: number) => a + b, 0) * 100).toFixed(1)}% variance)`,
+      title: {
+        text: `PC1 (${(results.visualization.explainedVariance[0] / results.visualization.explainedVariance.reduce((a: number, b: number) => a + b, 0) * 100).toFixed(1)}% variance)`
+      },
       showgrid: true,
       gridcolor: '#E5E7EB'
     },
     yaxis: {
-      title: `PC2 (${(results.visualization.explainedVariance[1] / results.visualization.explainedVariance.reduce((a: number, b: number) => a + b, 0) * 100).toFixed(1)}% variance)`,
+      title: {
+        text: `PC2 (${(results.visualization.explainedVariance[1] / results.visualization.explainedVariance.reduce((a: number, b: number) => a + b, 0) * 100).toFixed(1)}% variance)`
+      },
       showgrid: true,
       gridcolor: '#E5E7EB'
     },
     plot_bgcolor: '#FAFAFA',
     paper_bgcolor: 'white',
     margin: { l: 60, r: 40, t: 60, b: 60 },
-    hovermode: 'closest',
+    hovermode: 'closest' as const,
     showlegend: true,
     legend: {
       x: 1.02,
@@ -110,7 +155,7 @@ export default function Results({ results, onReset }: ResultsProps) {
     );
 
     const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .map((row: (string | number)[]) => row.map((cell: string | number) => `"${cell}"`).join(','))
       .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -203,7 +248,7 @@ export default function Results({ results, onReset }: ResultsProps) {
             <div>
               <h5 className="font-medium text-gray-800 mb-2">Most Discriminative Dimensions</h5>
               <div className="space-y-2">
-                {results.statistics.dimensionStats.slice(0, 10).map((stat: any, index: number) => (
+                {results.statistics.dimensionStats.slice(0, 10).map((stat: DimensionStat, index: number) => (
                   <div key={index} className="flex justify-between text-sm">
                     <span>Dimension {stat.dimension}</span>
                     <span className={`font-mono ${stat.significance === 'significant' ? 'text-green-600' : 'text-gray-500'}`}>
@@ -218,10 +263,10 @@ export default function Results({ results, onReset }: ResultsProps) {
               <h5 className="font-medium text-gray-800 mb-2">Analysis Summary</h5>
               <div className="space-y-2 text-sm text-gray-700">
                 <div>• Model: OpenAI text-embedding-3-large</div>
-                <div>• Statistical test: Welch's t-test</div>
+                <div>• Statistical test: Welch&apos;s t-test</div>
                 <div>• Clustering: K-means algorithm</div>
                 <div>• Visualization: PCA reduction to 2D</div>
-                <div>• Significant dimensions: {results.statistics.dimensionStats.filter((s: any) => s.significance === 'significant').length}/{results.statistics.numDimensions}</div>
+                <div>• Significant dimensions: {results.statistics.dimensionStats.filter((s: DimensionStat) => s.significance === 'significant').length}/{results.statistics.numDimensions}</div>
               </div>
             </div>
           </div>
@@ -233,7 +278,7 @@ export default function Results({ results, onReset }: ResultsProps) {
         <h4 className="font-medium text-gray-900">Cluster Details</h4>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {results.clusters.map((cluster: any) => (
+          {results.clusters.map((cluster: Cluster) => (
             <div
               key={cluster.id}
               className={`border rounded-lg p-4 cursor-pointer transition-colors ${
@@ -262,8 +307,8 @@ export default function Results({ results, onReset }: ResultsProps) {
               {selectedCluster === cluster.id && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {cluster.items.map((item: any, index: number) => (
-                      <div key={index} className="text-xs text-gray-700">
+                    {cluster.items.map((item: ClusterItem) => (
+                      <div key={item.identifier} className="text-xs text-gray-700">
                         <span className="font-mono">{item.identifier}</span>
                         {item.label && (
                           <span className="ml-2 text-blue-600">({item.label})</span>

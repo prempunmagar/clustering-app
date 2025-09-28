@@ -146,7 +146,7 @@ export default function LabelingInterface({
           Label Sample Items ({Object.keys(currentLabels).length} of {selectedSamples.length} labeled)
         </h4>
 
-        {selectedSamples.map((sample, index) => {
+        {selectedSamples.map((sample) => {
           const identifier = sample[selectedColumns.identifier];
           const description = sample[selectedColumns.description];
           const currentLabel = currentLabels[identifier];

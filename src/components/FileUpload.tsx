@@ -216,9 +216,9 @@ export default function FileUpload({ onDataUploaded }: FileUploadProps) {
         <h4 className="font-medium text-gray-900 mb-2">Example Data Structure:</h4>
         <div className="text-sm text-gray-700 font-mono bg-white p-3 rounded border">
           <div>Identifier,Description</div>
-          <div>Site_001,"Archaeological site with pottery fragments..."</div>
-          <div>Site_002,"Ancient burial mound with ceremonial objects..."</div>
-          <div>Site_003,"Settlement area with cooking hearths..."</div>
+          <div>Site_001,&quot;Archaeological site with pottery fragments...&quot;</div>
+          <div>Site_002,&quot;Ancient burial mound with ceremonial objects...&quot;</div>
+          <div>Site_003,&quot;Settlement area with cooking hearths...&quot;</div>
         </div>
       </div>
     </div>

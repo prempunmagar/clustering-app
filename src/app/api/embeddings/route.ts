@@ -59,17 +59,18 @@ export async function POST(request: NextRequest) {
         if (i + batchSize < descriptions.length) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('OpenAI API Error:', error);
+        const apiError = error as { status?: number; message?: string };
 
-        if (error.status === 429) {
+        if (apiError.status === 429) {
           return NextResponse.json(
             { error: 'Rate limit exceeded. Please try again in a moment.' },
             { status: 429 }
           );
         }
 
-        if (error.status === 401) {
+        if (apiError.status === 401) {
           return NextResponse.json(
             { error: 'Invalid OpenAI API key. Please check your configuration.' },
             { status: 401 }
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json(
-          { error: `OpenAI API error: ${error.message}` },
+          { error: `OpenAI API error: ${apiError.message || 'Unknown error'}` },
           { status: 500 }
         );
       }
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       model: 'text-embedding-3-large'
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Embeddings API Error:', error);
     return NextResponse.json(
       { error: 'Internal server error while processing embeddings' },

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DataRow } from '@/app/page';
 
 interface DataPreviewProps {
@@ -16,7 +16,7 @@ export default function DataPreview({ data, selectedColumns, onColumnsSelected }
   const [localSelection, setLocalSelection] = useState(selectedColumns);
   const [error, setError] = useState<string | null>(null);
 
-  const columns = data.length > 0 ? Object.keys(data[0]) : [];
+  const columns = useMemo(() => data.length > 0 ? Object.keys(data[0]) : [], [data]);
 
   useEffect(() => {
     // Auto-detect likely identifier and description columns
@@ -34,7 +34,7 @@ export default function DataPreview({ data, selectedColumns, onColumnsSelected }
         description: descriptionColumn || identifierColumn
       });
     }
-  }, [columns, selectedColumns]);
+  }, [columns, selectedColumns.identifier, selectedColumns.description]);
 
   const validateSelection = () => {
     if (!localSelection.identifier || !localSelection.description) {

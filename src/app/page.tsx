@@ -81,9 +81,9 @@ export default function Home() {
       setResults(analysisResults);
       setCurrentStep('results');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Processing error:', error);
-      setProcessingError(error.message);
+      setProcessingError(error instanceof Error ? error.message : 'Unknown error occurred');
     }
   };
 
@@ -92,7 +92,7 @@ export default function Home() {
     if (currentStep === 'processing' && !results && !processingError) {
       processData();
     }
-  }, [currentStep]);
+  }, [currentStep, processData, processingError, results]);
 
   const stepTitles = {
     upload: 'Upload CSV Data',

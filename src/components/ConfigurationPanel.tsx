@@ -126,7 +126,7 @@ export default function ConfigurationPanel({
                 <h5 className="font-medium text-gray-700 mb-2">Statistical Method Details:</h5>
                 <ul className="space-y-1 list-disc list-inside">
                   <li>Embedding Model: OpenAI text-embedding-3-large (1536 dimensions)</li>
-                  <li>Statistical Test: Welch's t-test (unequal variances)</li>
+                  <li>Statistical Test: Welch&apos;s t-test (unequal variances)</li>
                   <li>Significance Level: α = 0.05</li>
                   <li>Clustering Algorithm: K-means with random initialization</li>
                   <li>Visualization: PCA reduction for 2D scatter plot</li>
@@ -164,7 +164,7 @@ export default function ConfigurationPanel({
           <p>• Selecting top {localConfig.numDimensions} most discriminative dimensions</p>
           <p>• Creating {localConfig.numClusters} clusters using K-means algorithm</p>
           <p>• Using OpenAI text-embedding-3-large for semantic representation</p>
-          <p>• Applying Welch's t-test for dimension selection</p>
+          <p>• Applying Welch&apos;s t-test for dimension selection</p>
         </div>
       </div>
     </div>
