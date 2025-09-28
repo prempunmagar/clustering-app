@@ -31,24 +31,24 @@ interface DimensionStat {
   significance: string;
 }
 
-interface Statistics {
-  selectedDimensions: number[];
-  dimensionStats: DimensionStat[];
-  numClusters: number;
-  numDimensions: number;
-  totalSamples: number;
-  labeledSamples: number;
-}
-
-interface Visualization {
-  points: VisualizationPoint[];
-  explainedVariance: number[];
-  totalVarianceExplained: number;
-}
-
-
 interface ResultsProps {
-  results: any;
+  results: {
+    clusters: Cluster[];
+    visualization: {
+      points: VisualizationPoint[];
+      explainedVariance: number[];
+      totalVarianceExplained: number;
+    };
+    statistics: {
+      selectedDimensions: number[];
+      dimensionStats: DimensionStat[];
+      numClusters: number;
+      numDimensions: number;
+      totalSamples: number;
+      labeledSamples: number;
+    };
+    clusterAssignments: number[];
+  } | null;
   onReset: () => void;
 }
 
@@ -146,8 +146,8 @@ export default function Results({ results, onReset }: ResultsProps) {
 
   const exportCSV = () => {
     const headers = ['Identifier', 'Cluster', 'Original_Label'];
-    const rows = results.clusters.flatMap((cluster: any) =>
-      cluster.items.map((item: any) => [
+    const rows = results.clusters.flatMap((cluster: Cluster) =>
+      cluster.items.map((item: ClusterItem) => [
         item.identifier,
         `Cluster ${cluster.id + 1}`,
         item.label || 'Unlabeled'
@@ -227,7 +227,7 @@ export default function Results({ results, onReset }: ResultsProps) {
       {/* Interactive scatter plot */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <Plot
-          data={plotData}
+          data={plotData as any} // eslint-disable-line @typescript-eslint/no-explicit-any
           layout={plotLayout}
           config={{
             responsive: true,

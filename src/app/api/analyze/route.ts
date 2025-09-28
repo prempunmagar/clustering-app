@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Step 3: Perform PCA for visualization
-    const pcaResult = performPCA(clusteringResult.standardizedData, 2);
+    const pcaResult = performPCA(clusteringResult.standardizedData);
 
     // Step 4: Prepare results
     const results = {

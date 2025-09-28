@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FileUpload from '@/components/FileUpload';
 import DataPreview from '@/components/DataPreview';
 import LabelingInterface from '@/components/LabelingInterface';
@@ -30,12 +30,12 @@ export default function Home() {
     numDimensions: 40,
     numClusters: 2
   });
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<unknown>(null);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [processingProgress, setProcessingProgress] = useState<string>('Starting analysis...');
 
   // Processing function
-  const processData = async () => {
+  const processData = useCallback(async () => {
     try {
       setProcessingError(null);
 
@@ -85,7 +85,7 @@ export default function Home() {
       console.error('Processing error:', error);
       setProcessingError(error instanceof Error ? error.message : 'Unknown error occurred');
     }
-  };
+  }, [csvData, selectedColumns.description, selectedColumns.identifier, labels, config]);
 
   // Effect to start processing when entering processing step
   useEffect(() => {
@@ -204,7 +204,7 @@ export default function Home() {
       case 'results':
         return (
           <Results
-            results={results}
+            results={results as any} // eslint-disable-line @typescript-eslint/no-explicit-any
             onReset={() => {
               setCsvData([]);
               setSelectedColumns({ identifier: '', description: '' });
