@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ttest2 } from '@stdlib/stats-ttest';
 import { Matrix } from 'ml-matrix';
-import { KMeans } from 'ml-kmeans';
+import { kmeans } from 'ml-kmeans';
 
 interface AnalyzeRequest {
   embeddings: number[][];
@@ -135,14 +135,14 @@ function performClustering(
   }
 
   // Perform K-means clustering
-  const kmeans = new KMeans(standardizedMatrix.to2DArray(), numClusters, {
+  const kmeansResult = kmeans(standardizedMatrix.to2DArray(), numClusters, {
     initialization: 'random',
     maxIterations: 100
   });
 
   return {
-    clusters: kmeans.clusters,
-    centroids: kmeans.centroids,
+    clusters: kmeansResult.clusters,
+    centroids: kmeansResult.centroids,
     standardizedData: standardizedMatrix.to2DArray(),
     means: means.to2DArray()[0],
     stds: stds.to2DArray()[0]
