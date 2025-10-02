@@ -6,6 +6,7 @@ import DataPreview from '@/components/DataPreview';
 import LabelingInterface from '@/components/LabelingInterface';
 import ConfigurationPanel from '@/components/ConfigurationPanel';
 import Results from '@/components/Results';
+import { performAnalysis } from '@/utils/analysis';
 
 export type ProcessingStep = 'upload' | 'preview' | 'labeling' | 'configuration' | 'processing' | 'results';
 
@@ -78,39 +79,17 @@ export default function Home() {
 
       setProcessingProgress('Generating embeddings... 100%');
 
-      // Step 2: Perform statistical analysis and clustering
+      // Step 2: Perform statistical analysis and clustering (client-side)
       setProcessingProgress('Performing statistical analysis and clustering...');
       const identifiers = csvData.map(row => row[selectedColumns.identifier]);
 
-      const analysisResponse = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          embeddings: allEmbeddings,
-          labels,
-          identifiers,
-          config
-        })
-      });
-
-      if (!analysisResponse.ok) {
-        let errorMessage = 'Failed to perform analysis';
-        try {
-          const contentType = analysisResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const error = await analysisResponse.json();
-            errorMessage = error.error || errorMessage;
-          } else {
-            const textError = await analysisResponse.text();
-            errorMessage = textError || `Server error: ${analysisResponse.status} ${analysisResponse.statusText}`;
-          }
-        } catch {
-          errorMessage = `Server error: ${analysisResponse.status} ${analysisResponse.statusText}`;
-        }
-        throw new Error(errorMessage);
-      }
-
-      const analysisResults = await analysisResponse.json();
+      // Run analysis in the browser
+      const analysisResults = performAnalysis(
+        allEmbeddings,
+        labels,
+        identifiers,
+        config
+      );
 
       setResults(analysisResults);
       setCurrentStep('results');
@@ -224,7 +203,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="text-center space-y-4">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="mt-4 text-lg text-gray-600">
                   {processingProgress}
                 </p>
@@ -257,26 +236,12 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4">
-            <svg className="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="12" r="4" fill="#3B82F6" />
-              <circle cx="12" cy="28" r="4" fill="#3B82F6" />
-              <circle cx="36" cy="28" r="4" fill="#3B82F6" />
-              <circle cx="24" cy="40" r="4" fill="#3B82F6" />
-              <line x1="24" y1="16" x2="15" y2="25" stroke="#3B82F6" strokeWidth="2" />
-              <line x1="24" y1="16" x2="33" y2="25" stroke="#3B82F6" strokeWidth="2" />
-              <line x1="15" y1="31" x2="21" y2="37" stroke="#3B82F6" strokeWidth="2" />
-              <line x1="33" y1="31" x2="27" y2="37" stroke="#3B82F6" strokeWidth="2" />
-            </svg>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Archeology Project
-              </h1>
-              <p className="mt-1 text-gray-600">
-                Methodology for small-scale heterogeneous text clustering
-              </p>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Archeology Project
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Methodology for small-scale heterogeneous text clustering
+          </p>
         </div>
       </header>
 
