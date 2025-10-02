@@ -50,8 +50,20 @@ export default function Home() {
       });
 
       if (!embeddingsResponse.ok) {
-        const error = await embeddingsResponse.json();
-        throw new Error(error.error || 'Failed to generate embeddings');
+        let errorMessage = 'Failed to generate embeddings';
+        try {
+          const contentType = embeddingsResponse.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await embeddingsResponse.json();
+            errorMessage = error.error || errorMessage;
+          } else {
+            const textError = await embeddingsResponse.text();
+            errorMessage = textError || `Server error: ${embeddingsResponse.status} ${embeddingsResponse.statusText}`;
+          }
+        } catch {
+          errorMessage = `Server error: ${embeddingsResponse.status} ${embeddingsResponse.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const embeddingsData = await embeddingsResponse.json();
@@ -72,8 +84,20 @@ export default function Home() {
       });
 
       if (!analysisResponse.ok) {
-        const error = await analysisResponse.json();
-        throw new Error(error.error || 'Failed to perform analysis');
+        let errorMessage = 'Failed to perform analysis';
+        try {
+          const contentType = analysisResponse.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await analysisResponse.json();
+            errorMessage = error.error || errorMessage;
+          } else {
+            const textError = await analysisResponse.text();
+            errorMessage = textError || `Server error: ${analysisResponse.status} ${analysisResponse.statusText}`;
+          }
+        } catch {
+          errorMessage = `Server error: ${analysisResponse.status} ${analysisResponse.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const analysisResults = await analysisResponse.json();
