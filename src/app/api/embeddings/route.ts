@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (descriptions.length > 2000) {
+    if (descriptions.length > 200) {
       return NextResponse.json(
-        { error: 'Too many descriptions. Maximum 2000 allowed.' },
+        { error: 'Too many descriptions in single request. Maximum 200 allowed per chunk.' },
         { status: 400 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     const embeddings: number[][] = [];
-    const batchSize = 50; // Process in smaller batches to avoid rate limits
+    const batchSize = 20; // Process in smaller batches to stay under timeout and rate limits
 
     for (let i = 0; i < descriptions.length; i += batchSize) {
       const batch = descriptions.slice(i, i + batchSize);
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
         // Add a small delay between batches to respect rate limits
         if (i + batchSize < descriptions.length) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
       } catch (error: unknown) {
         console.error('OpenAI API Error:', error);

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Statistical Text Clustering",
-  description: "Statistical dimension selection for small-scale heterogeneous text clustering",
+  title: "Archeology Project",
+  description: "Statistical analysis and clustering for text classification",
 };
 
 export default function RootLayout({

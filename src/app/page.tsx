@@ -39,34 +39,44 @@ export default function Home() {
     try {
       setProcessingError(null);
 
-      // Step 1: Generate embeddings
-      setProcessingProgress('Generating embeddings...');
+      // Step 1: Generate embeddings in chunks (for Vercel free tier 10s limit)
       const descriptions = csvData.map(row => row[selectedColumns.description]);
+      const chunkSize = 100; // Process 100 at a time to stay under 10s limit
+      const allEmbeddings: number[][] = [];
 
-      const embeddingsResponse = await fetch('/api/embeddings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ descriptions })
-      });
+      for (let i = 0; i < descriptions.length; i += chunkSize) {
+        const chunk = descriptions.slice(i, Math.min(i + chunkSize, descriptions.length));
+        const progress = Math.round((i / descriptions.length) * 100);
+        setProcessingProgress(`Generating embeddings... ${progress}% (${i}/${descriptions.length})`);
 
-      if (!embeddingsResponse.ok) {
-        let errorMessage = 'Failed to generate embeddings';
-        try {
-          const contentType = embeddingsResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const error = await embeddingsResponse.json();
-            errorMessage = error.error || errorMessage;
-          } else {
-            const textError = await embeddingsResponse.text();
-            errorMessage = textError || `Server error: ${embeddingsResponse.status} ${embeddingsResponse.statusText}`;
+        const embeddingsResponse = await fetch('/api/embeddings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ descriptions: chunk })
+        });
+
+        if (!embeddingsResponse.ok) {
+          let errorMessage = 'Failed to generate embeddings';
+          try {
+            const contentType = embeddingsResponse.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              const error = await embeddingsResponse.json();
+              errorMessage = error.error || errorMessage;
+            } else {
+              const textError = await embeddingsResponse.text();
+              errorMessage = textError || `Server error: ${embeddingsResponse.status} ${embeddingsResponse.statusText}`;
+            }
+          } catch {
+            errorMessage = `Server error: ${embeddingsResponse.status} ${embeddingsResponse.statusText}`;
           }
-        } catch {
-          errorMessage = `Server error: ${embeddingsResponse.status} ${embeddingsResponse.statusText}`;
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
+
+        const embeddingsData = await embeddingsResponse.json();
+        allEmbeddings.push(...embeddingsData.embeddings);
       }
 
-      const embeddingsData = await embeddingsResponse.json();
+      setProcessingProgress('Generating embeddings... 100%');
 
       // Step 2: Perform statistical analysis and clustering
       setProcessingProgress('Performing statistical analysis and clustering...');
@@ -76,7 +86,7 @@ export default function Home() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          embeddings: embeddingsData.embeddings,
+          embeddings: allEmbeddings,
           labels,
           identifiers,
           config
@@ -219,7 +229,7 @@ export default function Home() {
                   {processingProgress}
                 </p>
                 <p className="text-sm text-gray-500">
-                  This may take 30-60 seconds depending on your dataset size
+                  This may take 2-5 minutes for large datasets (processing in chunks)
                 </p>
               </div>
             )}
@@ -247,12 +257,26 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Statistical Dimension Selection for Text Classification
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Novel methodology for small-scale heterogeneous text clustering
-          </p>
+          <div className="flex items-center gap-4">
+            <svg className="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="12" r="4" fill="#3B82F6" />
+              <circle cx="12" cy="28" r="4" fill="#3B82F6" />
+              <circle cx="36" cy="28" r="4" fill="#3B82F6" />
+              <circle cx="24" cy="40" r="4" fill="#3B82F6" />
+              <line x1="24" y1="16" x2="15" y2="25" stroke="#3B82F6" strokeWidth="2" />
+              <line x1="24" y1="16" x2="33" y2="25" stroke="#3B82F6" strokeWidth="2" />
+              <line x1="15" y1="31" x2="21" y2="37" stroke="#3B82F6" strokeWidth="2" />
+              <line x1="33" y1="31" x2="27" y2="37" stroke="#3B82F6" strokeWidth="2" />
+            </svg>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Archeology Project
+              </h1>
+              <p className="mt-1 text-gray-600">
+                Methodology for small-scale heterogeneous text clustering
+              </p>
+            </div>
+          </div>
         </div>
       </header>
 
