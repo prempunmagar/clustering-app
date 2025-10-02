@@ -1,5 +1,5 @@
 import ttest from '@stdlib/stats-ttest';
-import { Matrix } from 'ml-matrix';
+import { Matrix, SingularValueDecomposition } from 'ml-matrix';
 import { kmeans } from 'ml-kmeans';
 
 // Statistical t-test for dimension selection
@@ -149,9 +149,9 @@ export function performClustering(
   };
 }
 
-// Simplified PCA for visualization - just use first two dimensions with some random projection
+// Real PCA for visualization using SVD
 export function performPCA(data: number[][]) {
-  if (data.length === 0 || data[0].length < 2) {
+  if (data.length === 0 || data[0].length === 0) {
     return {
       projectedData: data.map((_, i) => [i, 0]),
       explainedVariance: [1.0, 0.0],
@@ -159,21 +159,53 @@ export function performPCA(data: number[][]) {
     };
   }
 
-  // Simple approach: just take first two dimensions and normalize
-  const projectedData = data.map((row, i) => {
-    if (row.length >= 2) {
-      return [row[0], row[1]];
-    } else if (row.length === 1) {
-      return [row[0], Math.random() * 0.1]; // Add small random component for visualization
-    } else {
-      return [i, 0]; // Fallback
+  const matrix = new Matrix(data);
+
+  // Handle edge case where we have fewer dimensions than needed
+  if (matrix.columns < 2) {
+    return {
+      projectedData: data.map((row, i) => [row[0] || 0, i * 0.1]),
+      explainedVariance: [1.0, 0.0],
+      totalVariance: 1.0
+    };
+  }
+
+  // Center the data (subtract mean from each column)
+  const means = matrix.mean('column') as number[];
+  const centeredMatrix = matrix.clone();
+  for (let col = 0; col < matrix.columns; col++) {
+    for (let row = 0; row < matrix.rows; row++) {
+      centeredMatrix.set(row, col, matrix.get(row, col) - means[col]);
     }
+  }
+
+  // Perform SVD (Singular Value Decomposition)
+  const svd = new SingularValueDecomposition(centeredMatrix, {
+    computeLeftSingularVectors: true,
+    computeRightSingularVectors: false
   });
+
+  // Get the first 2 principal components
+  const pc1 = svd.leftSingularVectors.getColumn(0);
+  const pc2 = svd.leftSingularVectors.getColumn(1);
+
+  // Project data onto first 2 principal components
+  const projectedData = pc1.map((val, idx) => [val, pc2[idx]]);
+
+  // Calculate explained variance
+  const singularValues = svd.diagonal;
+  const eigenvalues = singularValues.map(sv => sv * sv / (matrix.rows - 1));
+  const totalVariance = eigenvalues.reduce((sum, val) => sum + val, 0);
+
+  const explainedVariance = [
+    eigenvalues[0] / totalVariance,
+    eigenvalues[1] / totalVariance
+  ];
 
   return {
     projectedData,
-    explainedVariance: [0.8, 0.2], // Mock values for visualization
-    totalVariance: 1.0
+    explainedVariance,
+    totalVariance: explainedVariance[0] + explainedVariance[1]
   };
 }
 

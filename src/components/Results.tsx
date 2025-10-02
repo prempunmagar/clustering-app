@@ -98,14 +98,14 @@ export default function Results({ results, onReset }: ResultsProps) {
     },
     xaxis: {
       title: {
-        text: `PC1 (${(results.visualization.explainedVariance[0] / results.visualization.explainedVariance.reduce((a: number, b: number) => a + b, 0) * 100).toFixed(1)}% variance)`
+        text: `PC1 (${(results.visualization.explainedVariance[0] * 100).toFixed(1)}% variance)`
       },
       showgrid: true,
       gridcolor: '#E5E7EB'
     },
     yaxis: {
       title: {
-        text: `PC2 (${(results.visualization.explainedVariance[1] / results.visualization.explainedVariance.reduce((a: number, b: number) => a + b, 0) * 100).toFixed(1)}% variance)`
+        text: `PC2 (${(results.visualization.explainedVariance[1] * 100).toFixed(1)}% variance)`
       },
       showgrid: true,
       gridcolor: '#E5E7EB'
@@ -220,12 +220,22 @@ export default function Results({ results, onReset }: ResultsProps) {
           <div className="text-2xl font-bold text-orange-900">
             {(results.visualization.totalVarianceExplained * 100).toFixed(1)}%
           </div>
-          <div className="text-sm text-orange-700">Variance Explained</div>
+          <div className="text-sm text-orange-700">
+            Variance Explained by PC1+PC2
+          </div>
+          <div className="text-xs text-orange-600 mt-1">
+            How much of the data variation is shown in the 2D plot
+          </div>
         </div>
       </div>
 
       {/* Interactive scatter plot */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="mb-3 text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded p-3">
+          <strong>About PCA Visualization:</strong> Principal Component Analysis (PCA) reduces high-dimensional embeddings to 2D for visualization.
+          PC1 and PC2 are the two most important directions that capture the most variation in your data.
+          Higher variance explained means the 2D plot better represents the actual data structure.
+        </div>
         <Plot
           data={plotData as any} // eslint-disable-line @typescript-eslint/no-explicit-any
           layout={plotLayout}
