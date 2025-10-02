@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DataRow } from '@/app/page';
 
 interface LabelingInterfaceProps {
@@ -20,17 +20,14 @@ export default function LabelingInterface({
   onLabelsComplete
 }: LabelingInterfaceProps) {
   const [currentLabels, setCurrentLabels] = useState(labels);
-  const [selectedSamples, setSelectedSamples] = useState<DataRow[]>([]);
   const [availableGroups, setAvailableGroups] = useState<string[]>(['Group A', 'Group B']);
   const [newGroupName, setNewGroupName] = useState('');
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
-  useEffect(() => {
-    // Select random samples for labeling (6-10 items)
-    const numSamples = Math.min(Math.max(8, Math.floor(data.length * 0.1)), 10);
-    const shuffled = [...data].sort(() => 0.5 - Math.random());
-    setSelectedSamples(shuffled.slice(0, numSamples));
-  }, [data]);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const currentItems = data.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
   const addNewGroup = () => {
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
@@ -73,7 +70,7 @@ export default function LabelingInterface({
           Minimal Labeling
         </h3>
         <p className="text-gray-600">
-          Label just 1-2 examples per group. This creates reference data for statistical dimension selection.
+          Label just 1-2 examples per group. Use Previous/Next buttons to browse through your data to find representative examples.
         </p>
       </div>
 
@@ -142,11 +139,34 @@ export default function LabelingInterface({
 
       {/* Labeling interface */}
       <div className="space-y-4">
-        <h4 className="font-medium text-gray-900">
-          Label Sample Items ({Object.keys(currentLabels).length} of {selectedSamples.length} labeled)
-        </h4>
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-gray-900">
+            Label Items ({Object.keys(currentLabels).length} total labeled)
+          </h4>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">
+              Page {currentPage + 1} of {totalPages} (showing {currentItems.length} items)
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                disabled={currentPage === 0}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                disabled={currentPage === totalPages - 1}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        </div>
 
-        {selectedSamples.map((sample) => {
+        {currentItems.map((sample) => {
           const identifier = sample[selectedColumns.identifier];
           const description = sample[selectedColumns.description];
           const currentLabel = currentLabels[identifier];

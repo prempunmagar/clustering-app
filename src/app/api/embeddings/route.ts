@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (descriptions.length > 1000) {
+    if (descriptions.length > 2000) {
       return NextResponse.json(
-        { error: 'Too many descriptions. Maximum 1000 allowed.' },
+        { error: 'Too many descriptions. Maximum 2000 allowed.' },
         { status: 400 }
       );
     }
