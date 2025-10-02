@@ -257,8 +257,7 @@ export function performAnalysis(
         label: labels[identifiers[index]] || null
       })),
       explainedVariance: pcaResult.explainedVariance,
-      totalVarianceExplained:
-        pcaResult.explainedVariance.reduce((sum, val) => sum + val, 0) / pcaResult.totalVariance
+      totalVarianceExplained: pcaResult.totalVariance
     },
     statistics: {
       selectedDimensions,
