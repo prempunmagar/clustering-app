@@ -202,6 +202,15 @@ export function performPCA(data: number[][]) {
     eigenvalues[1] / totalVariance
   ];
 
+  console.log('PCA Debug:', {
+    numDimensions: matrix.columns,
+    numSamples: matrix.rows,
+    numComponents: eigenvalues.length,
+    pc1Variance: (explainedVariance[0] * 100).toFixed(2) + '%',
+    pc2Variance: (explainedVariance[1] * 100).toFixed(2) + '%',
+    totalExplained: ((explainedVariance[0] + explainedVariance[1]) * 100).toFixed(2) + '%'
+  });
+
   return {
     projectedData,
     explainedVariance,

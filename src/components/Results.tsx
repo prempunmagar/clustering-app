@@ -223,9 +223,6 @@ export default function Results({ results, onReset }: ResultsProps) {
           <div className="text-sm text-orange-700">
             Variance Explained by PC1+PC2
           </div>
-          <div className="text-xs text-orange-600 mt-1">
-            How much of the data variation is shown in the 2D plot
-          </div>
         </div>
       </div>
 
