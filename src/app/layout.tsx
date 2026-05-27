@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Archeology Project",
-  description: "Statistical analysis and clustering for text classification",
+  title: "DissentMap",
+  description: "Unearthing Dissent Groups and Resistance within Ancient Communities",
 };
 
 export default function RootLayout({
