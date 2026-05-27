@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Archeology Project** - A Next.js app implementing a novel methodology for small-scale heterogeneous text clustering using minimal labeling and statistical dimension selection.
+**DissentMap** - A Next.js app for unearthing dissent groups and resistance within ancient communities, implementing a novel methodology for small-scale heterogeneous text clustering using minimal labeling and statistical dimension selection.
 
 ## Core Architecture
 
@@ -143,8 +143,8 @@ For Vercel deployment, add this to Project Settings > Environment Variables for 
 
 ## Branding
 
-- **App Name**: "Archeology Project"
-- **Tagline**: "Methodology for small-scale heterogeneous text clustering"
+- **App Name**: "DissentMap"
+- **Tagline**: "Unearthing Dissent Groups and Resistance within Ancient Communities"
 - **No logo** - text-only header (logo was removed for cleaner design)
 
 ## Common Issues & Solutions

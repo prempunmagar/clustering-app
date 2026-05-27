@@ -1,10 +1,10 @@
-# Archeology Project
+# DissentMap
 
-A web application for statistical text classification and clustering using minimal labeling and dimension selection.
+Unearthing Dissent Groups and Resistance within Ancient Communities.
 
 ## Overview
 
-Archeology Project implements a novel methodology for small-scale heterogeneous text clustering. It uses OpenAI embeddings, statistical t-tests for dimension selection, and K-means clustering to automatically group text data with minimal manual labeling.
+DissentMap implements a novel methodology for small-scale heterogeneous text clustering. It uses OpenAI embeddings, statistical t-tests for dimension selection, and K-means clustering to automatically group text data with minimal manual labeling.
 
 ## Features
 
